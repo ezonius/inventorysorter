@@ -14,6 +14,11 @@ minecraft {
 }
 
 repositories {
+	maven {
+		name = "CottonMC"
+		url = "http://server.bbkr.space:8081/artifactory/libs-release"
+	}
+	maven { url "http://ezonius.sytes.net/maven" }
 	maven { url 'https://maven.fabricmc.net/io/github/prospector/modmenu/ModMenu/' }
 	maven {url 'https://dl.bintray.com/kyrptonaught/kyrptconfig'}
 }
@@ -24,8 +29,18 @@ dependencies {
 	modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
 	modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-modImplementation 'net.kyrptonaught:kyrptconfig:+'
-	include 'net.kyrptonaught:kyrptconfig:+'
+//	modImplementation 'net.kyrptonaught:kyrptconfig:1.0.0-1.16'
+//	include 'net.kyrptonaught:kyrptconfig:1.0.0-1.16'
+
+	modImplementation "io.github.prospector:modmenu:${project.modmenu_version}"
+
+	modImplementation "me.shedaniel.cloth:config-2:4.0.4-unstable"
+	include "me.shedaniel.cloth:config-2:4.0.4-unstable"
+
+	modImplementation "me.sargunvohra.mcmods:autoconfig1u:3.0.1-unstable"
+	include "me.sargunvohra.mcmods:autoconfig1u:3.0.1-unstable"
+
+
 }
 
 
@@ -67,6 +82,9 @@ publishing {
 		mavenJava(MavenPublication) {
 			// add all the jars that should be included when publishing to maven
 			artifact(jar) {
+				builtBy remapJar
+			}
+			artifact(remapJar) {
 				builtBy remapJar
 			}
 			artifact(sourcesJar) {

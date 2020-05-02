@@ -1,9 +1,12 @@
 package net.kyrptonaught.inventorysorter.mixin;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.kyrptonaught.inventorysorter.InventorySorterMod;
 import net.kyrptonaught.inventorysorter.client.SortButtonWidget;
 import net.kyrptonaught.inventorysorter.client.SortableContainerScreen;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemGroup;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -17,6 +20,7 @@ public abstract class MixinCreativeInventoryScreen implements SortableContainerS
     @Shadow
     private static int selectedTab;
 
+    @Environment(EnvType.CLIENT)
     @Inject(method = "init", at = @At("TAIL"), cancellable = true)
     private void invsort$init(CallbackInfo callbackinfo) {
         if (InventorySorterMod.getConfig().displaySort) {
@@ -24,9 +28,10 @@ public abstract class MixinCreativeInventoryScreen implements SortableContainerS
             sortbtn.visible = selectedTab == ItemGroup.INVENTORY.getIndex();
         }
     }
-
+    
+    @Environment(EnvType.CLIENT)
     @Inject(method = "render", at = @At("TAIL"))
-    private void invsort$render(int int_1, int int_2, float float_1, CallbackInfo callbackinfo) {
+    private void invsort$render(MatrixStack matrixStack, int int_1, int int_2, float float_1, CallbackInfo callbackinfo) {
         if (InventorySorterMod.getConfig().displaySort) {
             SortButtonWidget sortbtn = this.getSortButton();
             sortbtn.visible = selectedTab == ItemGroup.INVENTORY.getIndex();

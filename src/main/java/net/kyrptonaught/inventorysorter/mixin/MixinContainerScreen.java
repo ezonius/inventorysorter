@@ -6,8 +6,9 @@ import net.kyrptonaught.inventorysorter.InventorySorterMod;
 import net.kyrptonaught.inventorysorter.client.SortButtonWidget;
 import net.kyrptonaught.inventorysorter.client.SortableContainerScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.ContainerScreen;
-import net.minecraft.container.Container;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,22 +19,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
-@Mixin(ContainerScreen.class)
+@Mixin(HandledScreen.class)
 public abstract class MixinContainerScreen extends Screen implements SortableContainerScreen {
     @Shadow
-    protected int containerWidth;
+    protected int backgroundWidth;
     @Shadow
-    protected int containerHeight;
+    protected int backgroundHeight;
 
     @Shadow
     @Final
-    protected Container container;
+    protected ScreenHandler handler;
 
     @Shadow
     protected int x;
     @Shadow
     protected int y;
     private SortButtonWidget invsort$SortBtn;
+    private SortButtonWidget inv2sort$SortBtn;
 
     protected MixinContainerScreen(Text text_1) {
         super(text_1);
@@ -43,9 +45,9 @@ public abstract class MixinContainerScreen extends Screen implements SortableCon
     private void invsort$init(CallbackInfo callbackinfo) {
         if (InventorySorterMod.getConfig().displaySort) {
             boolean playerOnly = InventoryHelper.isPlayerOnlyInventory(this);
-            this.addButton(invsort$SortBtn = new SortButtonWidget(this.x + this.containerWidth - 20, this.y + (playerOnly ? (containerHeight - 95) : 6), playerOnly));
+            this.addButton(invsort$SortBtn = new SortButtonWidget(this.x + this.backgroundWidth - 20, this.y + (playerOnly ? (backgroundHeight - 95) : 6), playerOnly));
             if (!playerOnly && InventorySorterMod.getConfig().seperateBtn)
-                this.addButton(new SortButtonWidget(invsort$SortBtn.x, this.y + this.container.getSlot(this.container.slots.size() - 36).yPosition - 12, true));
+                this.addButton(inv2sort$SortBtn = new SortButtonWidget(invsort$SortBtn.x, this.y + this.handler.getSlot(this.handler.slots.size() - 36).y - 12, true));
         }
     }
 
@@ -66,9 +68,11 @@ public abstract class MixinContainerScreen extends Screen implements SortableCon
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void invsort$render(int int_1, int int_2, float float_1, CallbackInfo callbackinfo) {
+    private void invsort$render(MatrixStack matrixStack, int int_1, int int_2, float float_1, CallbackInfo callbackinfo) {
         if (invsort$SortBtn != null)
-            invsort$SortBtn.x = this.x + this.containerWidth - 20;
+            invsort$SortBtn.x = this.x + this.backgroundWidth - 20;
+        if (inv2sort$SortBtn != null)
+            inv2sort$SortBtn.x = this.x + this.backgroundWidth - 20;
     }
 
     @Override
